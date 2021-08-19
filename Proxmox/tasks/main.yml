@@ -1,21 +1,52 @@
 ---
 # tasks file for Proxmox
-- name: find VM
-  shell: qm list
+
+- name: find running VM
+  shell: qm list | grep running
   args:
     executable: /bin/bash
   changed_when: false
   register: list_vm
 
-- name: find container
-  shell: pct list
+- name: find running container
+  shell: pct list | grep running
   args:
     executable: /bin/bash
   changed_when: false
   register: list_contsiners
 
 - name: show running vm 
-  debug: list_vm
+  debug: var=list_vm.stdout_lines
 
 - name: show running containers 
-  debug: list_contsiners
+  debug: var=list_contsiners.stdout_lines
+
+- name: find running VM id
+  shell: qm list | grep running | grep -v VPN | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: list_vm_id
+
+- name: shutdown  VMs
+  command: 
+    cmd: qm shutdown {{ item }}
+  with_items: "{{ list_vm_id }}"
+
+- name: find container id
+  shell:  pct list | grep running | grep -v VPN | awk '{print $1}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: list_ct_id
+
+- name: shutdown  container
+  command: 
+    cmd: pct shutdown{{ item }}
+  with_items: "{{ list_ct_id }}"
+
+- name: shutdown node
+  shell: poweroff
+  args:
+    executable: /bin/bash
+  changed_when: false
