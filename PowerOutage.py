@@ -6,6 +6,7 @@ import time
 import telegram
 import pytz
 import smtplib
+import subprocess
 from datetime import datetime
 
 # change telegram token & chat_id in notify_tel
@@ -60,6 +61,14 @@ def send_mail(body):
     )
     print("EMAIL SENT!!")
     server.quit()
+
+def run_ansible():
+    try:
+        response = os.system("ansible-playbook -i inventory.yml playbook.yml")
+        return 1
+    except OSError:
+        print("run ansible failed")
+        return 2
 
 def main(alarm_triger):
     hostname = "192.168.1.20"
