@@ -1,2 +1,21 @@
 ---
 # tasks file for Proxmox
+- name: find VM
+  shell: qm list
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: list_vm
+
+- name: find container
+  shell: pct list
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: list_contsiners
+
+- name: show running vm 
+  debug: list_vm
+
+- name: show running containers 
+  debug: list_contsiners
