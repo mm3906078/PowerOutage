@@ -7,6 +7,7 @@ import telegram
 import pytz
 import smtplib
 import subprocess
+import sys
 from datetime import datetime
 
 # change telegram token & chat_id in notify_tel
@@ -33,13 +34,16 @@ def check_ping(hostname):
             response = os.system("ping -c 1 " + hostname)
         else:
             print("Unknown system")
+            response = os.system("echo Unknown system")
             return 5
         # and then check the response...
         if response == 0:
             print("Network Active")
+            response = os.system("echo Network Active")
             return 0
     except OSError:
         print("Network Error")
+        response = os.system("echo Network Error")
         return 2
 
 def send_mail(body):
@@ -68,36 +72,58 @@ def run_ansible():
         return 1
     except OSError:
         print("run ansible failed")
+        response = os.system("echo run ansible failed")
         return 2
 
 def main(alarm_triger):
     hostname = "192.168.1.20"
 
+    # orig_stdout = sys.stdout
+    # f = open('out.txt', 'w')
+    # sys.stdout = f
+    
     now = datetime.now(tz_iran)
     current_time_hours = now.strftime("%H")
     current_time_min = now.strftime("%M")
     current_time = now.strftime("%p")
+    date = now.strftime('%Y-%m-%d')
 
-    print(f"\n\n................{current_time_hours}:{current_time_min}....................")
+    print(f"\n\n................{date}/{current_time_hours}:{current_time_min}....................")
+    response = os.system("echo \n\n................"+date+ "/" + current_time_hours + ":" + current_time_min + "....................")
 
     if (check_ping(hostname) != 0):
         print("ITS UP")
+        response = os.system("echo ITS UP")
+        # sys.stdout = orig_stdout
+        # f.close()
         return 0
 
     elif (check_ping(hostname) == 0):
         if (int(current_time_hours) <= 12 and current_time == "AM"):
             print("EXPECTED DOWN TIME")
+            response = os.system("echo EXPECTED DOWN TIME")
+            # sys.stdout = orig_stdout
+            # f.close()
             return 0
         elif (int(current_time_hours) >= 10 and int(current_time_hours) < 12 and current_time == "PM"):
             print("EXPECTED DOWN TIME")
+            response = os.system("echo EXPECTED DOWN TIME")
+            # sys.stdout = orig_stdout
+            # f.close()
             return 0
         else:
             if (alarm_triger == False):
                 notify_tel("UNEXPECTED DOWN TIME Triger Alarm")
+                response = os.system("echo UNEXPECTED DOWN TIME Triger Alarm")
                 # send_mail("UNEXPECTED DOWN TIME Triger Alarm")
+                # sys.stdout = orig_stdout
+                # f.close()
                 return 2
             elif (alarm_triger == True):
                 print("UNEXPECTED DOWN TIME")
+                response = os.system("echo UNEXPECTED DOWN TIME")
+                # sys.stdout = orig_stdout
+                # f.close()
                 return 3
                 
 while (True):
