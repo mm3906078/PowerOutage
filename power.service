@@ -1,0 +1,19 @@
+[Unit]
+Description=PowerOutage
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+ExecStart=/bin/sh  -c '/usr/bin/python3 /root/PowerOutage.py >> /logs/power.log 2>&1'
+
+TimeoutStartSec=0
+KillSignal=SIGINT
+TimeoutStopSec=5
+Restart=on-failure
+SyslogIdentifier=consul
+
+[Install]
+WantedBy=multi-user.target
